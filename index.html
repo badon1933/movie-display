@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Movie Display</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+
+<body>
+  <main class="bg-dark text-secondary py-5" style="min-height: 100vh;">
+    <div class="container">
+      <section class="row">
+        <div class="col"></div>
+        <div class="col">
+          <div class="btn-group text-center d-flex justify-content-center" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-outline-secondary" id="ongoing-button">Ongoing</button>
+            <button type="button" class="btn btn-outline-secondary" id="completed-button">Completed</button>
+          </div>
+        </div>
+        <div class="col"></div>
+      </section>
+      <section class="row" id="main-content">
+
+
+      </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+    crossorigin="anonymous"></script>
+  <script>
+    (function () {
+
+      const ongoing = document.getElementById("ongoing-button")
+      const completed = document.getElementById("completed-button")
+      const content = document.getElementById("main-content")
+
+      ongoing.addEventListener("click", function () {
+        const endpoint = "home/"
+        const method = "get"
+        let result = request(endpoint, method)
+
+        ongoing.setAttribute("class", "btn btn-outline-secondary active")
+        fetch(result.home.on_going, content)
+      })
+
+      function fetch(data, content) {
+        data.forEach(res => {
+          content.innerHTML +=
+            `<div class="col-lg-2 text-center mt-5">
+            <a href="${res.link}" id="image-link">
+              <div class="card">
+                <img src="${res.thumb}" alt="img"
+                  style="max-height: 400px">
+              </div>
+            </a>
+            <p class="small mb-0 title">${res.title}</p>
+            <p class="small mb-0 episode"><span class="badge text-bg-secondary">${res.episode}</span></p>
+          </div>`;
+        })
+      }
+
+
+      function request(endpoint, method) {
+        const url = "https://otakudesu-api.herokuapp.com/api/"
+        let response = ""
+        xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            response = JSON.parse(xhr.responseText);
+          }
+        }
+        xhr.open(method, url + endpoint, false)
+        xhr.send()
+        return response
+      }
+    })()
+  </script>
+</body>
+
+</html>

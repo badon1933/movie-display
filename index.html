@@ -13,18 +13,31 @@
   <main class="bg-dark text-secondary py-5" style="min-height: 100vh;">
     <div class="container">
       <section class="row">
-        <div class="col"></div>
-        <div class="col">
+        <div class="col-4"></div>
+        <div class="col-4" id="navigation">
           <div class="btn-group text-center d-flex justify-content-center" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-outline-secondary" id="home-button">Home</button>
             <button type="button" class="btn btn-outline-secondary" id="ongoing-button">Ongoing</button>
             <button type="button" class="btn btn-outline-secondary" id="completed-button">Completed</button>
+            <button type="button" class="btn btn-outline-secondary" id="search-button">Search</button>
+            <button type="button" class="btn btn-outline-secondary" id="genre-button">Genre</button>
           </div>
         </div>
-        <div class="col"></div>
       </section>
       <section class="row" id="main-content">
-
-
+        <!-- Content -->
+      </section>
+      <section id="pagination">
+        <div class="row">
+          <div class="col-4"></div>
+          <div class="col-4">
+            <div class="d-flex justify-content-center mt-5">
+              <button class="btn btn-outline-secondary mx-1" onclick="pagination('prev')">Prev</button>
+              <button class="btn btn-outline-secondary mx-1" disabled>1</button>
+              <button class="btn btn-outline-secondary mx-1" onclick="pagination('next')">Next</button>
+            </div>
+          </div>
+        </div>
       </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
@@ -36,45 +49,87 @@
       const ongoing = document.getElementById("ongoing-button")
       const completed = document.getElementById("completed-button")
       const content = document.getElementById("main-content")
+      const home = document.getElementById("home-button")
+      const pagination = document.getElementById("pagination")
+
+      home.addEventListener("click", function () {
+        const endpoint = "home/"
+        const method = "get"
+        const params = ""
+
+        request(endpoint, method, params, function (result) {
+          content.innerHTML = ""
+          pagination.style.display = "none"
+          home.toggleAttribute("class", "btn btn-outline-secondary active")
+          ongoing.toggleAttribute("class", "btn btn-outline-secondary")
+          completed.toggleAttribute("class", "btn btn-outline-secondary")
+          fetch(result.home.on_going, content)
+          fetch(result.home.complete, content)
+        })
+      })
 
       ongoing.addEventListener("click", function () {
         const endpoint = "home/"
         const method = "get"
-        let result = request(endpoint, method)
+        const params = ""
 
-        ongoing.setAttribute("class", "btn btn-outline-secondary active")
-        fetch(result.home.on_going, content)
+        request(endpoint, method, params, function (result) {
+          // console.log(result)
+          content.innerHTML = ""
+          pagination.style.display = "none"
+          ongoing.toggleAttribute("class", "btn btn-outline-secondary active")
+          completed.toggleAttribute("class", "btn btn-outline-secondary")
+          home.toggleAttribute("class", "btn btn-outline-secondary")
+          fetch(result.home.on_going, content)
+        })
+
+      })
+
+      completed.addEventListener("click", function (result) {
+        const endpoint = "complete/page/"
+        const method = "get"
+        const params = "1"
+
+        request(endpoint, method, params, function (result) {
+          // console.log(result)
+          content.innerHTML = ""
+          pagination.style.display = "block"
+          completed.toggleAttribute("class", "btn btn-outline-secondary active")
+          ongoing.toggleAttribute("class", "btn btn-outline-secondary")
+          home.toggleAttribute("class", "btn btn-outline-secondary")
+          fetch(result.animeList, content)
+        })
       })
 
       function fetch(data, content) {
         data.forEach(res => {
           content.innerHTML +=
             `<div class="col-lg-2 text-center mt-5">
+              <h2></h2>
             <a href="${res.link}" id="image-link">
               <div class="card">
                 <img src="${res.thumb}" alt="img"
                   style="max-height: 400px">
               </div>
             </a>
-            <p class="small mb-0 title">${res.title}</p>
+            <p class="small mb-0 title text-light mt-2">${res.title}</p>
             <p class="small mb-0 episode"><span class="badge text-bg-secondary">${res.episode}</span></p>
           </div>`;
         })
       }
 
 
-      function request(endpoint, method) {
+      function request(endpoint, method, params, callback) {
         const url = "https://otakudesu-api.herokuapp.com/api/"
-        let response = ""
         xhr = new XMLHttpRequest()
         xhr.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
-            response = JSON.parse(xhr.responseText);
+            return callback(JSON.parse(xhr.responseText));
+            // console.log(response)
           }
         }
-        xhr.open(method, url + endpoint, false)
+        xhr.open(method, url + endpoint + params, true)
         xhr.send()
-        return response
       }
     })()
   </script>
